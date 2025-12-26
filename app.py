@@ -4,7 +4,15 @@ import time
 
 # Configuración de la página
 st.set_page_config(page_title="Asistente de Pedidos", page_icon="📦")
-
+# --- OCULTAR MARCA DE AGUA Y MENÚ ---
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
 st.title("📦 Rastreo de Envíos")
 st.markdown("Escribe tu número de pedido para saber dónde está.")
 
