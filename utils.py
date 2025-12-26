@@ -80,10 +80,10 @@ def render_status_card(row, title="Estado del Envío"):
 <div class="stage-item">En Camino</div>
 <div class="stage-item">Entregado</div>
 </div>
-<div style="margin-top: 1rem; border-top: 1px solid #eee; padding-top: 0.8rem; font-size: 0.9rem; color: #555;">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
-        <span>📅 <b>Fecha Est.:</b> {fecha_entrega}</span>
-        <span>🔒 <b>Custodia:</b> {es_custodia}</span>
+<div style="margin-top: 1rem; background-color: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 0.95rem; color: #333;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span>📅 <b>Entrega:</b> {fecha_entrega}</span>
+        <span>🔒 <b>Custodia:</b> <strong>{es_custodia}</strong></span>
     </div>
 </div>
 <div style="margin-top: 1rem;">

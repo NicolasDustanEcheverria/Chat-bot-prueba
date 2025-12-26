@@ -3,6 +3,7 @@ import time
 from utils import cargar_datos, buscar_pedido, render_status_card
 
 # --- CONFIGURACIÓN ---
+# Actualización de UI: Mostrar fecha y custodia
 st.set_page_config(page_title="Rastreo de Pedidos", page_icon="📦", layout="centered")
 
 # --- CARGAR CSS ---
