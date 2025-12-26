@@ -51,7 +51,7 @@ if prompt := st.chat_input("Ej: PED-12345"):
                 # Verificamos la columna 'custodia' directamente
                 val_custodia = str(row.get('custodia', '')).strip().lower()
                 esta_en_custodia = "SÍ" if val_custodia == "si" else "NO"
-                info_extra = f'<div style="margin-top:5px; color:#636E72;">El pedido {row["pedido"]} {esta_en_custodia} está en custodia.</div>'
+                info_extra = f'<div class="info-box" style="margin-top: 10px;">ℹ️ El pedido <b>{row["pedido"]}</b> {esta_en_custodia} está en custodia.</div>'
                 full_html = respuesta_html + info_extra
                 
                 message_placeholder.markdown(full_html, unsafe_allow_html=True)
@@ -86,3 +86,10 @@ if prompt := st.chat_input("Ej: PED-12345"):
                 resp = f"🔍 No pudimos identificar un pedido ni un cliente en: \"**{prompt}**\"."
                 message_placeholder.markdown(resp)
                 st.session_state.messages.append({"role": "assistant", "content": resp})
+
+# --- FOOTER ---
+st.markdown("""
+    <div style="position: fixed; bottom: 10px; width: 100%; text-align: center; color: #888; font-size: 0.8rem;">
+        Powered by AI 🤖 | v2.0 Premium
+    </div>
+""", unsafe_allow_html=True)

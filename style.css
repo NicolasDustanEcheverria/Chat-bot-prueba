@@ -1,18 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
 
 :root {
     --primary-color: #6C63FF;
-    --background-color: #F8F9FA;
-    --card-bg: #FFFFFF;
+    --primary-gradient: linear-gradient(135deg, #6C63FF 0%, #4834D4 100%);
+    --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
     --text-color: #2D3436;
     --subtext-color: #636E72;
+    --card-radius: 24px;
 }
 
 /* Reset global */
 .stApp {
-    background-color: var(--background-color);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
     color: var(--text-color);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Outfit', sans-serif;
 }
 
 /* Ocultar elementos de Streamlit */
@@ -26,137 +31,179 @@ header,
 }
 
 .block-container {
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
-    max-width: 800px;
+    padding-top: 3rem !important;
+    padding-bottom: 6rem !important;
+    max-width: 850px;
 }
 
 /* Título Principal */
 h1 {
     font-weight: 800 !important;
-    color: var(--text-color) !important;
-    font-size: 2.5rem !important;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 3rem !important;
     text-align: center;
     margin-bottom: 0.5rem !important;
+    letter-spacing: -1px;
 }
 
 .subtitle {
     text-align: center;
     color: var(--subtext-color);
-    font-size: 1.1rem;
-    margin-bottom: 3rem;
-    font-weight: 300;
+    font-size: 1.2rem;
+    margin-bottom: 4rem;
+    font-weight: 400;
 }
 
 /* Input de Chat */
 .stChatInputContainer {
-    padding-bottom: 20px !important;
+    padding-bottom: 30px !important;
+    background: transparent !important;
 }
 
 [data-testid="stChatInput"] {
-    border-radius: 20px !important;
-    border: 2px solid transparent !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
-    transition: all 0.3s ease;
-    background-color: var(--card-bg) !important;
+    border-radius: 30px !important;
+    border: var(--glass-border) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--glass-shadow) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 [data-testid="stChatInput"]:focus-within {
     border-color: var(--primary-color) !important;
-    box-shadow: 0 8px 25px rgba(108, 99, 255, 0.15) !important;
+    box-shadow: 0 12px 40px rgba(108, 99, 255, 0.25) !important;
     transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Burbujas General */
 /* Burbujas General */
 [data-testid="stChatMessage"] {
     background-color: transparent !important;
     border: none !important;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
-    padding: 1rem 1.5rem !important;
-    border-radius: 15px !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+    padding: 1.2rem 1.8rem !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    font-size: 1.05rem;
+    line-height: 1.6;
 }
 
 /* Burbuja del Usuario (Derecha/Color) */
-/* Usamos una clase personalizada renderizada por app.py para garantizar selectores */
 .user-message-content {
     color: white !important;
     font-weight: 500;
 }
 
-/* El contenedor padre (burbuja) cuando tiene el usuario */
 [data-testid="stChatMessage"]:has(.user-message-content) [data-testid="stMarkdownContainer"] {
-    background-color: var(--primary-color) !important;
-    margin-left: 2rem;
+    background: var(--primary-gradient) !important;
+    margin-left: 3rem;
+    border-bottom-right-radius: 5px !important;
+    box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3) !important;
 }
 
-/* Fallback para navegadores que no soporten :has si es necesario, 
-   o targeting directo por posición si streamlit lo permite.
-   Streamlit suele poner clases específicas, pero varían.
-   La mejor opción segura es estilizar el contenido interior.
-*/
-
-/* Burbuja del Asistente (Izquierda/Blanca) - Asumimos que es la que NO tiene .user-message-content */
+/* Burbuja del Asistente (Izquierda/Blanca) */
 [data-testid="stChatMessage"]:not(:has(.user-message-content)) [data-testid="stMarkdownContainer"] {
-    background-color: var(--card-bg) !important;
-    border: 1px solid #EFEFEF !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(8px);
+    border: var(--glass-border) !important;
     color: var(--text-color) !important;
-    margin-right: 2rem;
+    margin-right: 3rem;
+    border-bottom-left-radius: 5px !important;
 }
 
 /* Tarjeta de Estado */
 .status-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    border-left: 5px solid var(--primary-color);
-    margin: 1rem 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 2.5rem;
+    border-radius: var(--card-radius);
+    box-shadow: var(--glass-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    margin: 1.5rem 0;
     position: relative;
     overflow: hidden;
     color: var(--text-color);
+    transition: transform 0.3s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
 }
 
 .progress-container {
-    margin: 2rem 0 1rem 0;
+    margin: 2.5rem 0 1.5rem 0;
     position: relative;
     width: 100%;
-    height: 6px;
-    background: #F1F2F6;
+    height: 8px;
+    background: #E0E6ED;
     border-radius: 10px;
 }
 
 .progress-bar {
     height: 100%;
-    background: var(--primary-color);
+    background: var(--primary-gradient);
     border-radius: 10px;
-    transition: width 1s ease-in-out;
+    transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 10px rgba(108, 99, 255, 0.3);
 }
 
 .truck-icon {
     position: absolute;
-    top: -25px;
-    font-size: 24px;
-    transition: left 1s ease-in-out;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    top: -32px;
+    font-size: 28px;
+    transition: left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
 .stages {
     display: flex;
     justify-content: space-between;
-    margin-top: 10px;
-    font-size: 0.7rem;
+    margin-top: 15px;
+    font-size: 0.75rem;
     color: var(--subtext-color);
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .stage-item {
     flex: 1;
     text-align: center;
+    position: relative;
 }
 
 .stage-item:first-child {
@@ -168,38 +215,62 @@ h1 {
 }
 
 .status-title {
-    color: var(--subtext-color);
-    font-size: 0.8rem;
+    color: var(--primary-color);
+    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.5rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
 }
 
 .client-name {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(90deg, #2D3436, #636E72);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .status-badge {
-    display: inline-block;
-    padding: 0.4rem 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1rem;
     border-radius: 50px;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .status-success {
     background: #E6FFFA;
     color: #00B894;
+    border: 1px solid #B2F5EA;
 }
 
 .status-process {
     background: #E3F2FD;
     color: #0984E3;
+    border: 1px solid #BBDEFB;
 }
 
 .status-error {
     background: #FFEBEE;
     color: #D63031;
+    border: 1px solid #FFCDD2;
+}
+
+/* Info Box inside card */
+.info-box {
+    margin-top: 1.5rem;
+    background: rgba(248, 249, 250, 0.7);
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #2D3436;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
