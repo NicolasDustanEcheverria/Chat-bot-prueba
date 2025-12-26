@@ -7,27 +7,25 @@ st.set_page_config(page_title="Asistente de Pedidos", page_icon="📦")
 
 # --- CSS AGRESIVO PARA LIMPIEZA TOTAL ---
 # --- CSS "NUCLEAR" PARA OCULTAR TODO ---
+# --- CSS BLINDADO PARA OCULTAR TODO AL USUARIO ---
 hide_st_style = """
             <style>
-            /* 1. Ocultar la barra superior completa (donde está el Fork, GitHub y Menú) */
-            header {visibility: hidden !important; display: none !important;}
+            /* 1. Ocultar Menú Hamburguesa (3 rayas) y Toolbar superior */
+            #MainMenu {visibility: hidden !important; display: none !important;}
+            [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
             [data-testid="stHeader"] {visibility: hidden !important; display: none !important;}
             
-            /* 2. Ocultar el pie de página "Made with Streamlit" */
+            /* 2. Ocultar Pie de Página "Made with Streamlit" */
             footer {visibility: hidden !important; display: none !important;}
             [data-testid="stFooter"] {visibility: hidden !important; display: none !important;}
 
-            /* 3. Ocultar la decoración de colores arriba */
+            /* 3. Ocultar la barra de colores superior */
             div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
             
-            /* 4. Eliminar espacio vacío extra arriba */
+            /* 4. Ajustar el espacio superior para que no quede un hueco */
             .block-container {
-                padding-top: 0rem !important;
+                padding-top: 1rem !important;
             }
-            
-            /* 5. (Opcional) Ocultar botón de 'Deploy' o herramientas de desarrollador si persisten */
-            .stDeployButton {display:none !important;}
-            [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
