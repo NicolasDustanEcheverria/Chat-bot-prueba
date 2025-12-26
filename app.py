@@ -172,6 +172,8 @@ df = cargar_datos()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "last_order" not in st.session_state:
+    st.session_state.last_order = None
 
 # Mostrar historial
 for message in st.session_state.messages:
@@ -180,7 +182,6 @@ for message in st.session_state.messages:
             st.markdown(message["content"], unsafe_allow_html=True)
         else:
             st.markdown(message["content"])
-
 # --- 3. LÓGICA DEL BOT ---
 
 if prompt := st.chat_input("Ej: PED-12345"):
@@ -193,47 +194,75 @@ if prompt := st.chat_input("Ej: PED-12345"):
     # Respuesta bot
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        # Loading simulado minimalista
-        message_placeholder.markdown("⏳ *Consultando base de datos...*")
-        time.sleep(0.8) 
+        message_placeholder.markdown("⏳ *Consultando...*")
+        time.sleep(0.6) 
         
-        pedido_buscado = prompt.strip()
+        prompt_lower = prompt.lower()
         
-        # Lógica de búsqueda
-        if not df.empty and 'pedido' in df.columns:
-            resultado = df[df['pedido'] == pedido_buscado]
-            
-            if not resultado.empty:
-                estado = resultado.iloc[0]['estado']
-                cliente = resultado.iloc[0]['cliente']
-                
-                # Determinar estilo del badge según estado (simple heurística)
-                badge_class = "status-process"
-                if "entregado" in str(estado).lower():
-                    badge_class = "status-success"
-                elif "cancelado" in str(estado).lower() or "error" in str(estado).lower():
-                    badge_class = "status-error"
-
-                # Generar HTML Card
-                respuesta_html = f"""
-                <div class="status-card">
-                    <div class="status-title">Detalles del Pedido</div>
-                    <div class="client-name">{cliente}</div>
-                    <div>
-                        Estado: <span class="status-badge {badge_class}">{estado}</span>
-                    </div>
-                </div>
-                """
-                message_placeholder.markdown(respuesta_html, unsafe_allow_html=True)
-                
-                # Guardar en historial como HTML
-                st.session_state.messages.append({"role": "assistant", "content": respuesta_html, "is_html": True})
-            
+        # 1. DETECCIÓN DE INTENCIÓN: CUSTODIA
+        if "custodia" in prompt_lower:
+            if st.session_state.last_order:
+                lo = st.session_state.last_order
+                if "custodia" in str(lo['estado']).lower():
+                    resp = f"Confirmado, **{lo['cliente']}**. Tu pedido **{lo['pedido']}** se encuentra actualmente en **Custodia**."
+                else:
+                    resp = f"No, el pedido **{lo['pedido']}** no está en custodia. Su estado actual es: **{lo['estado']}**."
             else:
-                respuesta_texto = f"🔍 No encontramos el pedido **{pedido_buscado}**. Verifícalo e intenta de nuevo."
-                message_placeholder.markdown(respuesta_texto)
-                st.session_state.messages.append({"role": "assistant", "content": respuesta_texto, "is_html": False})
+                resp = "Para confirmarte si un pedido está en custodia, por favor indícame primero el número de pedido."
+            
+            message_placeholder.markdown(resp)
+            st.session_state.messages.append({"role": "assistant", "content": resp, "is_html": False})
+
+        # 2. BÚSQUEDA SMART (SI NO SE MANEJÓ POR KEYWORD O SI PARECE TENER UN ID)
         else:
-             respuesta_texto = "⚠️ Estamos actualizando el sistema. Por favor intenta en unos minutos."
-             message_placeholder.markdown(respuesta_texto)
-             st.session_state.messages.append({"role": "assistant", "content": respuesta_texto, "is_html": False})
+            if not df.empty and 'pedido' in df.columns:
+                lista_pedidos_reales = df['pedido'].astype(str).tolist()
+                pedido_encontrado_id = None
+                
+                palabras_usuario = prompt.split()
+                for palabra in palabras_usuario:
+                    palabra_limpia = palabra.strip(".,;?!¡¿'\"")
+                    match = next((x for x in lista_pedidos_reales if str(x).lower() == palabra_limpia.lower()), None)
+                    if match:
+                        pedido_encontrado_id = match
+                        break 
+
+                clave_busqueda = pedido_encontrado_id if pedido_encontrado_id else prompt.strip()
+                resultado = df[df['pedido'] == clave_busqueda]
+                
+                if not resultado.empty:
+                    estado = resultado.iloc[0]['estado']
+                    cliente = resultado.iloc[0]['cliente']
+                    
+                    # Guardar en contexto
+                    st.session_state.last_order = {
+                        "pedido": clave_busqueda,
+                        "cliente": cliente,
+                        "estado": estado
+                    }
+                    
+                    badge_class = "status-process"
+                    if "entregado" in str(estado).lower(): badge_class = "status-success"
+                    elif "cancelado" in str(estado).lower() or "error" in str(estado).lower(): badge_class = "status-error"
+                    elif "custodia" in str(estado).lower(): badge_class = "status-process" # Podríamos usar otro color si existiera
+
+                    respuesta_html = f"""
+                    <div class="status-card">
+                        <div class="status-title">Detalles del Pedido</div>
+                        <div class="client-name">{cliente}</div>
+                        <div>
+                            Estado: <span class="status-badge {badge_class}">{estado}</span>
+                        </div>
+                    </div>
+                    """
+                    message_placeholder.markdown(respuesta_html, unsafe_allow_html=True)
+                    st.session_state.messages.append({"role": "assistant", "content": respuesta_html, "is_html": True})
+                
+                else:
+                    respuesta_texto = f"🔍 No pudimos identificar un pedido válido en: \"**{prompt}**\"."
+                    message_placeholder.markdown(respuesta_texto)
+                    st.session_state.messages.append({"role": "assistant", "content": respuesta_texto, "is_html": False})
+            else:
+                 respuesta_texto = "⚠️ El sistema no está disponible."
+                 message_placeholder.markdown(respuesta_texto)
+                 st.session_state.messages.append({"role": "assistant", "content": respuesta_texto, "is_html": False})
