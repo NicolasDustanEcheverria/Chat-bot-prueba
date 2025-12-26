@@ -47,7 +47,9 @@ if prompt := st.chat_input("Ej: PED-12345"):
                 row = st.session_state.last_order
                 respuesta_html = render_status_card(row, title="Consulta de Custodia")
                 # Personalizar un poco el texto bajo la tarjeta
-                esta_en_custodia = "SÍ" if "custodia" in str(row['estado']).lower() else "NO"
+                # Verificamos la columna 'custodia' directamente
+                val_custodia = str(row.get('custodia', '')).strip().lower()
+                esta_en_custodia = "SÍ" if val_custodia == "si" else "NO"
                 info_extra = f'<div style="margin-top:5px; color:#636E72;">El pedido {row["pedido"]} {esta_en_custodia} está en custodia.</div>'
                 full_html = respuesta_html + info_extra
                 
