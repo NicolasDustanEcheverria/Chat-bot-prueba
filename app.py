@@ -6,29 +6,28 @@ import time
 st.set_page_config(page_title="Asistente de Pedidos", page_icon="📦")
 
 # --- CSS AGRESIVO PARA LIMPIEZA TOTAL ---
+# --- CSS "NUCLEAR" PARA OCULTAR TODO ---
 hide_st_style = """
             <style>
-            /* Ocultar menú de hamburguesa, footer y cabecera decorativa */
-            #MainMenu {visibility: hidden; display: none;}
-            footer {visibility: hidden; display: none;}
-            header {visibility: hidden; display: none;}
+            /* 1. Ocultar la barra superior completa (donde está el Fork, GitHub y Menú) */
+            header {visibility: hidden !important; display: none !important;}
+            [data-testid="stHeader"] {visibility: hidden !important; display: none !important;}
             
-            /* Ocultar la barra superior de colores de Streamlit */
-            div[data-testid="stDecoration"] {
-                visibility: hidden;
-                display: none;
-            }
+            /* 2. Ocultar el pie de página "Made with Streamlit" */
+            footer {visibility: hidden !important; display: none !important;}
+            [data-testid="stFooter"] {visibility: hidden !important; display: none !important;}
 
-            /* Eliminar el espacio en blanco gigante de arriba */
+            /* 3. Ocultar la decoración de colores arriba */
+            div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
+            
+            /* 4. Eliminar espacio vacío extra arriba */
             .block-container {
-                padding-top: 1rem !important;
-                padding-bottom: 0rem !important;
+                padding-top: 0rem !important;
             }
             
-            /* (Opcional) Ocultar botón de 'Deploy' si apareciera */
-            .stDeployButton {
-                display:none;
-            }
+            /* 5. (Opcional) Ocultar botón de 'Deploy' o herramientas de desarrollador si persisten */
+            .stDeployButton {display:none !important;}
+            [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
