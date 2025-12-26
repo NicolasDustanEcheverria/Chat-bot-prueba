@@ -68,10 +68,10 @@ h1 {
 }
 
 /* Burbujas General */
+/* Burbujas General */
 [data-testid="stChatMessage"] {
     background-color: transparent !important;
     border: none !important;
-    margin-bottom: 1rem !important;
 }
 
 [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
@@ -81,26 +81,30 @@ h1 {
 }
 
 /* Burbuja del Usuario (Derecha/Color) */
-[data-testid="stChatMessage"][data-test-user-human="true"] [data-testid="stMarkdownContainer"] {
-    background-color: var(--primary-color) !important;
+/* Usamos una clase personalizada renderizada por app.py para garantizar selectores */
+.user-message-content {
     color: white !important;
+    font-weight: 500;
+}
+
+/* El contenedor padre (burbuja) cuando tiene el usuario */
+[data-testid="stChatMessage"]:has(.user-message-content) [data-testid="stMarkdownContainer"] {
+    background-color: var(--primary-color) !important;
     margin-left: 2rem;
 }
 
-[data-testid="stChatMessage"][data-test-user-human="true"] [data-testid="stMarkdownContainer"] p {
-    color: white !important;
-}
+/* Fallback para navegadores que no soporten :has si es necesario, 
+   o targeting directo por posición si streamlit lo permite.
+   Streamlit suele poner clases específicas, pero varían.
+   La mejor opción segura es estilizar el contenido interior.
+*/
 
-/* Burbuja del Asistente (Izquierda/Blanca) */
-[data-testid="stChatMessage"][data-test-user-human="false"] [data-testid="stMarkdownContainer"] {
+/* Burbuja del Asistente (Izquierda/Blanca) - Asumimos que es la que NO tiene .user-message-content */
+[data-testid="stChatMessage"]:not(:has(.user-message-content)) [data-testid="stMarkdownContainer"] {
     background-color: var(--card-bg) !important;
     border: 1px solid #EFEFEF !important;
     color: var(--text-color) !important;
     margin-right: 2rem;
-}
-
-[data-testid="stChatMessage"][data-test-user-human="false"] [data-testid="stMarkdownContainer"] p {
-    color: var(--text-color) !important;
 }
 
 /* Tarjeta de Estado */

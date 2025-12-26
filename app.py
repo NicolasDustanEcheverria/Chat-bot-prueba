@@ -32,7 +32,7 @@ if prompt := st.chat_input("Ej: PED-12345"):
     
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.markdown(prompt, unsafe_allow_html=True)
+        st.markdown(f'<div class="user-message-content">{prompt}</div>', unsafe_allow_html=True)
 
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
