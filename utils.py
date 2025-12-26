@@ -12,20 +12,76 @@ def cargar_datos():
     except Exception as e:
         return pd.DataFrame()
 
+import re
+from difflib import get_close_matches
+
 def buscar_pedido(prompt, df):
     if df.empty or 'pedido' not in df.columns:
-        return None
+        return None, None  # Retorna tupla (Row, Razon)
+
+    # 0. Normalización básica
+    prompt_norm = prompt.strip()
+    lista_pedidos = df['pedido'].astype(str).tolist()
+    lista_clientes = df['cliente'].astype(str).tolist() if 'cliente' in df.columns else []
+
+    # ESTRATEGIA 1: Búsqueda exacta o Regex de números en el prompt
+    # Busca cualquier secuencia de números o alfanuméricos que se parezca a un pedido
+    # Aceptamos pedidos que sean solo números o letras-números
+    match_directo = None
     
-    lista_pedidos_reales = df['pedido'].astype(str).tolist()
-    palabras = prompt.split()
+    # Intento 1: Coincidencia exacta de palabra
+    words = prompt_norm.split()
+    for w in words:
+        clean_w = w.strip(".,;?!¡¿'\"").lower()
+        # Buscar en la lista de pedidos (normalizada)
+        for idx, pedido_real in enumerate(lista_pedidos):
+            if str(pedido_real).strip().lower() == clean_w:
+                return df.iloc[idx], "Exact Match"
+
+    # Intento 2: Búsqueda difusa en Pedidos (Typos)
+    # Usamos difflib para ver si alguna palabra se parece mucho a un pedido real
+    for w in words:
+        clean_w = w.strip(".,;?!¡¿'\"")
+        matches = get_close_matches(clean_w, [str(p) for p in lista_pedidos], n=1, cutoff=0.85)
+        if matches:
+            best_match = matches[0]
+            row = df[df['pedido'].astype(str) == best_match].iloc[0]
+            return row, f"Fuzzy Match Pedido ({best_match})"
+
+    # ESTRATEGIA 2: Búsqueda por Nombre de Cliente (Fuzzy parcial)
+    # Si el usuario dice "pedido de Nicolas", buscamos "Nicolas" en la columna clientes
+    # Esto es más complejo porque el nombre puede ser multi-palabra.
+    # Vamos a buscar si el prompt contiene subcadenas que coincidan con clientes.
     
-    for p in palabras:
-        p_limpia = p.strip(".,;?!¡¿'\"")
-        match = next((x for x in lista_pedidos_reales if str(x).lower() == p_limpia.lower()), None)
-        if match:
-            return df[df['pedido'] == match].iloc[0]
+    # Ordenamos clientes por longitud (descendente) para matchear nombres largos primero
+    unique_clients = list(set([str(c) for c in lista_clientes if str(c).lower() != 'nan']))
+    # Un filtro simple: si alguna parte del prompt está en el nombre del cliente
     
-    return None
+    prompt_lower = prompt_norm.lower()
+    
+    best_client_match = None
+    highest_score = 0
+    
+    for client in unique_clients:
+        client_clean = client.strip().lower()
+        if not client_clean: continue
+        
+        # 1. Chequeo directo: si el nombre del cliente está en el prompt
+        if client_clean in prompt_lower:
+             # Prioridad absoluta si está contenido
+             row = df[df['cliente'].astype(str) == client].iloc[0]
+             return row, f"Match Cliente ({client})"
+             
+        # 2. Fuzzy match de palabras clave del cliente
+        # Si cliente es "Nicolas Dustan", y prompt es "nicolas", match.
+        client_parts = client_clean.split()
+        for part in client_parts:
+            if len(part) > 3 and part in prompt_lower:
+                # Coincidencia parcial fuerte
+                row = df[df['cliente'].astype(str) == client].iloc[0]
+                return row, f"Match Cliente Parcial ({client})"
+
+    return None, None
 
 def render_status_card(row, title="Estado del Envío"):
     cliente = row['cliente']

@@ -63,14 +63,26 @@ if prompt := st.chat_input("Ej: PED-12345"):
 
         # 2. Caso: Búsqueda Normal/Smart
         else:
-            row = buscar_pedido(prompt, df)
+            row, reason = buscar_pedido(prompt, df)
             
             if row is not None:
                 st.session_state.last_order = row
+                
+                # Mensaje contextual si fue por nombre de cliente
+                intro_msg = ""
+                if "Cliente" in reason:
+                    cliente_detectado = row['cliente']
+                    intro_msg = f"🧠 *Entendí que buscas el pedido de:* **{cliente_detectado}**<br>"
+                elif "Fuzzy" in reason:
+                    pedido_detectado = row['pedido']
+                    intro_msg = f"🧠 *Quizás quisiste decir el pedido:* **{pedido_detectado}**<br>"
+                
                 respuesta_html = render_status_card(row)
-                message_placeholder.markdown(respuesta_html, unsafe_allow_html=True)
-                st.session_state.messages.append({"role": "assistant", "content": respuesta_html})
+                full_resp = intro_msg + respuesta_html
+                
+                message_placeholder.markdown(full_resp, unsafe_allow_html=True)
+                st.session_state.messages.append({"role": "assistant", "content": full_resp})
             else:
-                resp = f"🔍 No pudimos identificar un pedido válido en: \"**{prompt}**\"."
+                resp = f"🔍 No pudimos identificar un pedido ni un cliente en: \"**{prompt}**\"."
                 message_placeholder.markdown(resp)
                 st.session_state.messages.append({"role": "assistant", "content": resp})
