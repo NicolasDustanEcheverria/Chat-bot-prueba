@@ -3,35 +3,154 @@ import pandas as pd
 import time
 
 # Configuración de la página
-st.set_page_config(page_title="Asistente de Pedidos", page_icon="📦")
+# --- CONFIGURACIÓN DE PÁGINA ---
+st.set_page_config(page_title="Rastreo de Pedidos", page_icon="📦", layout="centered")
 
-# --- CSS AGRESIVO PARA LIMPIEZA TOTAL ---
-# --- CSS "NUCLEAR" PARA OCULTAR TODO ---
-# --- CSS BLINDADO PARA OCULTAR TODO AL USUARIO ---
-hide_st_style = """
-            <style>
-            /* 1. Ocultar Menú Hamburguesa (3 rayas) y Toolbar superior */
-            #MainMenu {visibility: hidden !important; display: none !important;}
-            [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-            [data-testid="stHeader"] {visibility: hidden !important; display: none !important;}
-            
-            /* 2. Ocultar Pie de Página "Made with Streamlit" */
-            footer {visibility: hidden !important; display: none !important;}
-            [data-testid="stFooter"] {visibility: hidden !important; display: none !important;}
+# --- CSS PERSONALIZADO: ESTILO MINIMALISTA Y LLAMATIVO ---
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
-            /* 3. Ocultar la barra de colores superior */
-            div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
-            
-            /* 4. Ajustar el espacio superior para que no quede un hueco */
-            .block-container {
-                padding-top: 1rem !important;
-            }
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+    :root {
+        --primary-color: #6C63FF; /* Un morado vibrante pero elegante */
+        --background-color: #F8F9FA;
+        --card-bg: #FFFFFF;
+        --text-color: #2D3436;
+        --subtext-color: #636E72;
+    }
+
+    /* Reset global */
+    .stApp {
+        background-color: var(--background-color);
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Ocultar elementos de Streamlit por defecto */
+    #MainMenu, footer, header, [data-testid="stToolbar"], [data-testid="stDecoration"] {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 800px;
+    }
+
+    /* Título Principal */
+    h1 {
+        font-weight: 800 !important;
+        color: var(--text-color) !important;
+        font-size: 2.5rem !important;
+        text-align: center;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .subtitle {
+        text-align: center;
+        color: var(--subtext-color);
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+        font-weight: 300;
+    }
+
+    /* Input de Chat Estilizado */
+    .stChatInputContainer {
+        padding-bottom: 20px !important;
+    }
+    
+    [data-testid="stChatInput"] {
+        border-radius: 20px !important;
+        border: 2px solid transparent !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+        transition: all 0.3s ease;
+        background-color: var(--card-bg) !important;
+    }
+    
+    [data-testid="stChatInput"]:focus-within {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 8px 25px rgba(108, 99, 255, 0.15) !important;
+        transform: translateY(-2px);
+    }
+    
+    [data-testid="stChatInput"] input {
+        color: var(--text-color) !important;
+    }
+
+    /* Burbujas de Chat */
+    [data-testid="stChatMessage"] {
+        background-color: transparent !important;
+        border: none !important;
+        padding: 1rem 0 !important;
+    }
+
+    [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
+        padding: 1rem 1.5rem !important;
+        border-radius: 12px !important;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important;
+    }
+
+    /* Burbuja del Usuario */
+    [data-testid="chatAvatarIcon-user"] {
+        background-color: var(--primary-color) !important;
+    }
+    div[data-testid="stChatMessage"]:nth-child(even) [data-testid="stMarkdownContainer"] {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+    }
+    div[data-testid="stChatMessage"]:nth-child(even) [data-testid="stMarkdownContainer"] p {
+        color: white !important;
+    }
+
+    /* Burbuja del Asistente */
+    [data-testid="chatAvatarIcon-assistant"] {
+        background-color: #00B894 !important; /* Verde menta para el bot */
+    }
+    div[data-testid="stChatMessage"]:nth-child(odd) [data-testid="stMarkdownContainer"] {
+        background-color: var(--card-bg) !important;
+        border: 1px solid #EFEFEF !important;
+        color: var(--text-color) !important;
+    }
+
+    /* Tarjeta de Estado (Custom HTML) */
+    .status-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border-left: 5px solid var(--primary-color);
+        margin-top: 1rem;
+    }
+    .status-title {
+        color: var(--subtext-color);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+    .client-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .status-success { background: #E6FFFA; color: #00B894; }
+    .status-process { background: #E3F2FD; color: #0984E3; }
+    .status-error { background: #FFEBEE; color: #D63031; }
+
+    </style>
+""", unsafe_allow_html=True)
 
 st.title("📦 Rastreo de Envíos")
-st.markdown("Escribe tu número de pedido para saber dónde está.")
+st.markdown('<p class="subtitle">Ingresa tu número de pedido para consultar el estado en tiempo real.</p>', unsafe_allow_html=True)
 
 # --- 1. CONEXIÓN A LOS DATOS ---
 @st.cache_data(ttl=60)
@@ -53,40 +172,68 @@ df = cargar_datos()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    st.session_state.messages.append({"role": "assistant", "content": "¡Hola! Soy el asistente virtual. Por favor, indícame tu número de pedido."})
 
+# Mostrar historial
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+        if message.get("is_html"):
+            st.markdown(message["content"], unsafe_allow_html=True)
+        else:
+            st.markdown(message["content"])
 
 # --- 3. LÓGICA DEL BOT ---
 
-if prompt := st.chat_input("Escribe tu número de pedido aquí..."):
+if prompt := st.chat_input("Ej: PED-12345"):
     
+    # Mensaje usuario
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
 
+    # Respuesta bot
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        message_placeholder.markdown("🔍 Buscando...")
-        time.sleep(0.5) 
+        # Loading simulado minimalista
+        message_placeholder.markdown("⏳ *Consultando base de datos...*")
+        time.sleep(0.8) 
         
         pedido_buscado = prompt.strip()
         
-        # Validación simple para evitar errores si el df está vacío
+        # Lógica de búsqueda
         if not df.empty and 'pedido' in df.columns:
             resultado = df[df['pedido'] == pedido_buscado]
             
             if not resultado.empty:
                 estado = resultado.iloc[0]['estado']
                 cliente = resultado.iloc[0]['cliente']
-                respuesta = f"Hola **{cliente}**, hemos encontrado tu pedido. \n\n El estado actual es: **{estado}**."
-            else:
-                respuesta = f"Lo siento, no encuentro el pedido **{pedido_buscado}**. Por favor verifica el número."
-        else:
-             respuesta = "Lo siento, estamos actualizando la base de datos. Intenta en un momento."
+                
+                # Determinar estilo del badge según estado (simple heurística)
+                badge_class = "status-process"
+                if "entregado" in str(estado).lower():
+                    badge_class = "status-success"
+                elif "cancelado" in str(estado).lower() or "error" in str(estado).lower():
+                    badge_class = "status-error"
 
-        message_placeholder.markdown(respuesta)
-    
-    st.session_state.messages.append({"role": "assistant", "content": respuesta})
+                # Generar HTML Card
+                respuesta_html = f"""
+                <div class="status-card">
+                    <div class="status-title">Detalles del Pedido</div>
+                    <div class="client-name">{cliente}</div>
+                    <div>
+                        Estado: <span class="status-badge {badge_class}">{estado}</span>
+                    </div>
+                </div>
+                """
+                message_placeholder.markdown(respuesta_html, unsafe_allow_html=True)
+                
+                # Guardar en historial como HTML
+                st.session_state.messages.append({"role": "assistant", "content": respuesta_html, "is_html": True})
+            
+            else:
+                respuesta_texto = f"🔍 No encontramos el pedido **{pedido_buscado}**. Verifícalo e intenta de nuevo."
+                message_placeholder.markdown(respuesta_texto)
+                st.session_state.messages.append({"role": "assistant", "content": respuesta_texto, "is_html": False})
+        else:
+             respuesta_texto = "⚠️ Estamos actualizando el sistema. Por favor intenta en unos minutos."
+             message_placeholder.markdown(respuesta_texto)
+             st.session_state.messages.append({"role": "assistant", "content": respuesta_texto, "is_html": False})
