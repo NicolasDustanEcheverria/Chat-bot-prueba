@@ -49,27 +49,23 @@ def render_status_card(row, title="Estado del Envío"):
                 config = val
                 break
 
-    html = f"""
-    <div class="status-card">
-        <div class="status-title">{title}</div>
-        <div class="client-name">{cliente}</div>
-        
-        <div class="progress-container">
-            <div class="progress-bar" style="width: {config['prog']}%;">
-                <div class="truck-icon" style="left: calc({config['prog']}% - 20px);">🚛</div>
-            </div>
-        </div>
-        <div class="stages">
-            <div class="stage-item">Pago</div>
-            <div class="stage-item">Proceso</div>
-            <div class="stage-item">En Camino</div>
-            <div class="stage-item">Entregado</div>
-        </div>
-
-        <div style="margin-top: 1.5rem;">
-            Pedido: <b>{pedido}</b> • 
-            <span class="status-badge {config['class']}">{config['icon']} {estado}</span>
-        </div>
-    </div>
-    """
+    html = f"""<div class="status-card">
+<div class="status-title">{title}</div>
+<div class="client-name">{cliente}</div>
+<div class="progress-container">
+<div class="progress-bar" style="width: {config['prog']}%;">
+<div class="truck-icon" style="left: calc({config['prog']}% - 20px);">🚛</div>
+</div>
+</div>
+<div class="stages">
+<div class="stage-item">Pago</div>
+<div class="stage-item">Proceso</div>
+<div class="stage-item">En Camino</div>
+<div class="stage-item">Entregado</div>
+</div>
+<div style="margin-top: 1.5rem;">
+Pedido: <b>{pedido}</b> • 
+<span class="status-badge {config['class']}">{config['icon']} {estado}</span>
+</div>
+</div>"""
     return html

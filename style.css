@@ -15,10 +15,15 @@
 }
 
 /* Ocultar elementos de Streamlit */
-#MainMenu, footer, header, [data-testid="stToolbar"], [data-testid="stDecoration"] {
+#MainMenu,
+footer,
+header,
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] {
     visibility: hidden !important;
     display: none !important;
 }
+
 .block-container {
     padding-top: 2rem !important;
     padding-bottom: 2rem !important;
@@ -50,7 +55,7 @@ h1 {
 [data-testid="stChatInput"] {
     border-radius: 20px !important;
     border: 2px solid transparent !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
     transition: all 0.3s ease;
     background-color: var(--card-bg) !important;
 }
@@ -61,29 +66,40 @@ h1 {
     transform: translateY(-2px);
 }
 
-/* Burbujas */
+/* Burbujas General */
 [data-testid="stChatMessage"] {
     background-color: transparent !important;
     border: none !important;
+    margin-bottom: 1rem !important;
 }
 
 [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
     padding: 1rem 1.5rem !important;
-    border-radius: 12px !important;
+    border-radius: 15px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
 }
 
-div[data-testid="stChatMessage"]:nth-child(even) [data-testid="stMarkdownContainer"] {
+/* Burbuja del Usuario (Derecha/Color) */
+[data-testid="stChatMessage"][data-test-user-human="true"] [data-testid="stMarkdownContainer"] {
     background-color: var(--primary-color) !important;
     color: white !important;
+    margin-left: 2rem;
 }
 
-div[data-testid="stChatMessage"]:nth-child(even) [data-testid="stMarkdownContainer"] p {
+[data-testid="stChatMessage"][data-test-user-human="true"] [data-testid="stMarkdownContainer"] p {
     color: white !important;
 }
 
-div[data-testid="stChatMessage"]:nth-child(odd) [data-testid="stMarkdownContainer"] {
+/* Burbuja del Asistente (Izquierda/Blanca) */
+[data-testid="stChatMessage"][data-test-user-human="false"] [data-testid="stMarkdownContainer"] {
     background-color: var(--card-bg) !important;
     border: 1px solid #EFEFEF !important;
+    color: var(--text-color) !important;
+    margin-right: 2rem;
+}
+
+[data-testid="stChatMessage"][data-test-user-human="false"] [data-testid="stMarkdownContainer"] p {
+    color: var(--text-color) !important;
 }
 
 /* Tarjeta de Estado */
@@ -91,7 +107,7 @@ div[data-testid="stChatMessage"]:nth-child(odd) [data-testid="stMarkdownContaine
     background: white;
     padding: 2rem;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     border-left: 5px solid var(--primary-color);
     margin: 1rem 0;
     position: relative;
@@ -120,7 +136,7 @@ div[data-testid="stChatMessage"]:nth-child(odd) [data-testid="stMarkdownContaine
     top: -25px;
     font-size: 24px;
     transition: left 1s ease-in-out;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .stages {
@@ -133,9 +149,18 @@ div[data-testid="stChatMessage"]:nth-child(odd) [data-testid="stMarkdownContaine
     font-weight: 600;
 }
 
-.stage-item { flex: 1; text-align: center; }
-.stage-item:first-child { text-align: left; }
-.stage-item:last-child { text-align: right; }
+.stage-item {
+    flex: 1;
+    text-align: center;
+}
+
+.stage-item:first-child {
+    text-align: left;
+}
+
+.stage-item:last-child {
+    text-align: right;
+}
 
 .status-title {
     color: var(--subtext-color);
@@ -159,6 +184,17 @@ div[data-testid="stChatMessage"]:nth-child(odd) [data-testid="stMarkdownContaine
     font-size: 0.8rem;
 }
 
-.status-success { background: #E6FFFA; color: #00B894; }
-.status-process { background: #E3F2FD; color: #0984E3; }
-.status-error { background: #FFEBEE; color: #D63031; }
+.status-success {
+    background: #E6FFFA;
+    color: #00B894;
+}
+
+.status-process {
+    background: #E3F2FD;
+    color: #0984E3;
+}
+
+.status-error {
+    background: #FFEBEE;
+    color: #D63031;
+}
