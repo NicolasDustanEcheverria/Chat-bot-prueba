@@ -50,6 +50,21 @@ def render_status_card(row, title="Estado del Envío"):
                 config = val
                 break
 
+    # Detectar fecha y custodia
+    custodia_val = str(row.get('custodia', 'No')).strip().lower()
+    es_custodia = "SÍ" if custodia_val == "si" else "NO"
+    
+    # Buscar la columna de fecha (la que no sea de las conocidas)
+    known_cols = ['pedido', 'cliente', 'estado', 'custodia']
+    fecha_entrega = "Pendiente"
+    for col in row.index:
+        if col.lower() not in known_cols:
+            # Asumimos que la columna sobrante es la fecha
+            val_fecha = str(row[col])
+            if val_fecha and val_fecha.lower() != "nan":
+                fecha_entrega = val_fecha
+            break
+
     html = f"""
 <div class="status-card">
 <div class="status-title">{title}</div>
@@ -65,7 +80,13 @@ def render_status_card(row, title="Estado del Envío"):
 <div class="stage-item">En Camino</div>
 <div class="stage-item">Entregado</div>
 </div>
-<div style="margin-top: 1.5rem;">
+<div style="margin-top: 1rem; border-top: 1px solid #eee; padding-top: 0.8rem; font-size: 0.9rem; color: #555;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+        <span>📅 <b>Fecha Est.:</b> {fecha_entrega}</span>
+        <span>🔒 <b>Custodia:</b> {es_custodia}</span>
+    </div>
+</div>
+<div style="margin-top: 1rem;">
 Pedido: <b>{pedido}</b> • 
 <span class="status-badge {config['class']}">{config['icon']} {estado}</span>
 </div>
