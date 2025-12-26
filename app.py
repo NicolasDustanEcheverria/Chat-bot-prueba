@@ -121,7 +121,47 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         border-left: 5px solid var(--primary-color);
         margin-top: 1rem;
+        position: relative;
+        overflow: hidden;
     }
+    
+    /* Progress Bar / Stepper */
+    .progress-container {
+        margin: 2rem 0 1rem 0;
+        position: relative;
+        width: 100%;
+        height: 6px;
+        background: #F1F2F6;
+        border-radius: 10px;
+    }
+    .progress-bar {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 10px;
+        transition: width 1s ease-in-out;
+    }
+    .truck-icon {
+        position: absolute;
+        top: -25px;
+        right: -15px;
+        font-size: 24px;
+        transition: all 1s ease-in-out;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    .stages {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 0.7rem;
+        color: var(--subtext-color);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    .stage-item { flex: 1; text-align: center; position: relative; }
+    .stage-item:first-child { text-align: left; }
+    .stage-item:last-child { text-align: right; }
+
     .status-title {
         color: var(--subtext-color);
         font-size: 0.9rem;
@@ -137,10 +177,10 @@ st.markdown("""
     }
     .status-badge {
         display: inline-block;
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
         border-radius: 50px;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
     .status-success { background: #E6FFFA; color: #00B894; }
     .status-process { background: #E3F2FD; color: #0984E3; }
@@ -203,15 +243,45 @@ if prompt := st.chat_input("Ej: PED-12345"):
         if "custodia" in prompt_lower:
             if st.session_state.last_order:
                 lo = st.session_state.last_order
-                if "custodia" in str(lo['estado']).lower():
-                    resp = f"Confirmado, **{lo['cliente']}**. Tu pedido **{lo['pedido']}** se encuentra actualmente en **Custodia**."
-                else:
-                    resp = f"No, el pedido **{lo['pedido']}** no está en custodia. Su estado actual es: **{lo['estado']}**."
+                
+                # Re-usamos la lógica de visualización para consistencia
+                status_map = {
+                    "pendiente de pago": {"prog": 10, "class": "status-process", "icon": "💰"},
+                    "en proceso": {"prog": 40, "class": "status-process", "icon": "⚙️"},
+                    "enviado": {"prog": 75, "class": "status-process", "icon": "🚛"},
+                    "entregado": {"prog": 100, "class": "status-success", "icon": "✅"},
+                    "custodia": {"prog": 60, "class": "status-process", "icon": "📦"},
+                    "cancelado": {"prog": 0, "class": "status-error", "icon": "❌"}
+                }
+                st_lower = str(lo['estado']).lower()
+                config = status_map.get(st_lower, {"prog": 0, "class": "status-process", "icon": "🚛"})
+                if config["prog"] == 0 and st_lower != "cancelado":
+                    for key, val in status_map.items():
+                        if key in st_lower:
+                            config = val
+                            break
+
+                respuesta_html = f"""
+                <div class="status-card">
+                    <div class="status-title">Consulta de Custodia</div>
+                    <div class="client-name">{lo['cliente']}</div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: {config['prog']}%;">
+                            <div class="truck-icon" style="left: calc({config['prog']}% - 20px);">🚛</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        El pedido <b>{lo['pedido']}</b> {"SÍ" if "custodia" in st_lower else "NO"} está en custodia.<br>
+                        Estado actual: <span class="status-badge {config['class']}">{config['icon']} {lo['estado']}</span>
+                    </div>
+                </div>
+                """
+                message_placeholder.markdown(respuesta_html, unsafe_allow_html=True)
+                st.session_state.messages.append({"role": "assistant", "content": respuesta_html, "is_html": True})
             else:
-                resp = "Para confirmarte si un pedido está en custodia, por favor indícame primero el número de pedido."
-            
-            message_placeholder.markdown(resp)
-            st.session_state.messages.append({"role": "assistant", "content": resp, "is_html": False})
+                resp = "🕵️ Para decirte si un pedido está en custodia, primero dime el número de pedido."
+                message_placeholder.markdown(resp)
+                st.session_state.messages.append({"role": "assistant", "content": resp, "is_html": False})
 
         # 2. BÚSQUEDA SMART (SI NO SE MANEJÓ POR KEYWORD O SI PARECE TENER UN ID)
         else:
@@ -234,6 +304,26 @@ if prompt := st.chat_input("Ej: PED-12345"):
                     estado = resultado.iloc[0]['estado']
                     cliente = resultado.iloc[0]['cliente']
                     
+                    # --- CÁLCULO DE PROGRESO ---
+                    status_map = {
+                        "pendiente de pago": {"prog": 10, "class": "status-process", "icon": "💰"},
+                        "en proceso": {"prog": 40, "class": "status-process", "icon": "⚙️"},
+                        "enviado": {"prog": 75, "class": "status-process", "icon": "🚛"},
+                        "entregado": {"prog": 100, "class": "status-success", "icon": "✅"},
+                        "custodia": {"prog": 60, "class": "status-process", "icon": "📦"},
+                        "cancelado": {"prog": 0, "class": "status-error", "icon": "❌"}
+                    }
+                    
+                    st_lower = str(estado).lower()
+                    config = status_map.get(st_lower, {"prog": 0, "class": "status-process", "icon": "🚛"})
+                    
+                    # Si no está en el mapa, intentamos búsqueda parcial
+                    if config["prog"] == 0 and st_lower != "cancelado":
+                        for key, val in status_map.items():
+                            if key in st_lower:
+                                config = val
+                                break
+
                     # Guardar en contexto
                     st.session_state.last_order = {
                         "pedido": clave_busqueda,
@@ -241,17 +331,27 @@ if prompt := st.chat_input("Ej: PED-12345"):
                         "estado": estado
                     }
                     
-                    badge_class = "status-process"
-                    if "entregado" in str(estado).lower(): badge_class = "status-success"
-                    elif "cancelado" in str(estado).lower() or "error" in str(estado).lower(): badge_class = "status-error"
-                    elif "custodia" in str(estado).lower(): badge_class = "status-process" # Podríamos usar otro color si existiera
-
+                    # Generar HTML Card con Progress Bar
                     respuesta_html = f"""
                     <div class="status-card">
-                        <div class="status-title">Detalles del Pedido</div>
+                        <div class="status-title">Estado del Envío</div>
                         <div class="client-name">{cliente}</div>
-                        <div>
-                            Estado: <span class="status-badge {badge_class}">{estado}</span>
+                        
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: {config['prog']}%;">
+                                <div class="truck-icon" style="left: calc({config['prog']}% - 20px);">🚛</div>
+                            </div>
+                        </div>
+                        <div class="stages">
+                            <div class="stage-item">Pago</div>
+                            <div class="stage-item">Proceso</div>
+                            <div class="stage-item">En Camino</div>
+                            <div class="stage-item">Entregado</div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            Pedido: <b>{clave_busqueda}</b> • 
+                            <span class="status-badge {config['class']}">{config['icon']} {estado}</span>
                         </div>
                     </div>
                     """
