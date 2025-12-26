@@ -11,6 +11,7 @@
 /* Reset global */
 .stApp {
     background-color: var(--background-color);
+    color: var(--text-color);
     font-family: 'Inter', sans-serif;
 }
 
